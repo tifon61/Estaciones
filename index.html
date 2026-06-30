@@ -13,418 +13,117 @@
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f8fafc; /* Fondo gris muy claro institucional */
+            background-color: #f1f5f9; /* Fondo gris muy claro para contraste */
             color: #334155; 
             margin: 0; 
             overflow-x: hidden;
         }
 
-        /* Estilo institucional para tarjetas */
         .card { 
-            background: #ffffff; 
+            background: linear-gradient(145deg, #ffffff 0%, #f8fafc 100%);
             border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            border-radius: 12px;
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05), 0 2px 6px -2px rgba(0, 0, 0, 0.025);
+            border-radius: 16px;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
         }
 
-        .card-title { 
-            color: #64748b; 
-            font-size: 0.875rem; 
-            font-weight: 600; 
-            text-transform: uppercase; 
-            letter-spacing: 0.05em; 
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
         }
 
-        .stat-value { 
-            font-size: 3rem; 
-            font-weight: 700; 
-            color: #0f172a; /* Azul muy oscuro casi negro para lectura clara */
+        .metric-title {
+            color: #64748b;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
         }
 
-        /* Botones institucionales */
+        .metric-value {
+            font-size: 2rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+
         .tab-btn {
-            background-color: #f1f5f9;
-            color: #475569;
+            background-color: transparent;
+            color: #64748b;
             border: 1px solid transparent;
             transition: all 0.2s ease;
         }
 
         .tab-btn:hover {
+            color: #0f172a;
             background-color: #e2e8f0;
         }
 
         .tab-btn.active { 
-            background-color: #004b87; /* Azul tipo UNLP */
+            background-color: #004b87; 
             color: white; 
-            border-color: #003865;
-            box-shadow: 0 2px 4px rgba(0, 75, 135, 0.2);
+            box-shadow: 0 4px 6px -1px rgba(0, 75, 135, 0.3);
+            border-radius: 8px;
         }
 
-        /* Scrollbar personalizado limpio */
         ::-webkit-scrollbar { width: 8px; }
-        ::-webkit-scrollbar-track { background: #f1f5f9; }
-        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        ::-webkit-scrollbar-track { background: #e2e8f0; }
+        ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #64748b; }
         
         input[type="datetime-local"] {
-            color: #334155;
-            background-color: #f8fafc;
+            color: #1e293b;
+            background-color: #ffffff;
         }
     </style>
 </head>
-<body class="p-4 md:p-8">
+<body class="p-4 md:p-6 lg:p-8">
 
-    <div class="max-w-6xl mx-auto">
-        <header class="card p-6 mb-8 flex flex-col md:flex-row justify-between items-center gap-6 border-t-4 border-t-[#004b87]">
-            <div class="flex items-center gap-6 w-full md:w-auto">
-                <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center border-2 border-slate-200 shrink-0">
-                    <i class="fa-solid fa-school text-3xl text-[#004b87]"></i>
+    <div class="max-w-7xl mx-auto">
+        <header class="card p-6 mb-6 flex flex-col md:flex-row justify-between items-center gap-6 border-t-4 border-t-[#004b87] bg-white">
+            <div class="flex items-center gap-5 w-full md:w-auto">
+                <div class="w-16 h-16 bg-blue-50 rounded-2xl flex items-center justify-center border border-blue-100 shrink-0 shadow-sm">
+                    <i class="fa-solid fa-school text-2xl text-[#004b87]"></i>
                 </div>
                 <div>
-                    <h1 class="text-2xl md:text-3xl font-bold text-slate-800">Red de Monitoreo Ambiental</h1>
-                    <p class="text-slate-500 font-medium mt-1">Datos Pluviométricos - Escuela Primaria N° 23</p>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-slate-800 tracking-tight">Red de Monitoreo Ambiental</h1>
+                    <p class="text-slate-500 font-medium mt-1 text-sm"><i class="fa-solid fa-location-dot mr-1"></i> EMA Escuela Primaria N° 23</p>
                 </div>
             </div>
             
-            <div class="text-right hidden md:block">
-                <span class="bg-emerald-100 text-emerald-800 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wide">
-                    <i class="fa-solid fa-circle-check mr-1"></i> Sistema Activo
+            <div class="flex flex-col items-end gap-2">
+                <span id="systemStatus" class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide border border-slate-200">
+                    <i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Cargando datos...
                 </span>
+                <span class="text-[10px] text-slate-400 font-medium">Factor Pluviómetro: 0.68mm</span>
             </div>
         </header>
 
-        <div class="card p-4 mb-8 flex flex-col lg:flex-row justify-between items-center gap-4">
-            <div class="flex gap-2 w-full lg:w-auto bg-slate-50 p-1 rounded-xl border border-slate-200">
-                <button onclick="setPreset('day')" id="btn-day" class="tab-btn active flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold">Hoy</button>
-                <button onclick="setPreset('week')" id="btn-week" class="tab-btn flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold">Semana</button>
-                <button onclick="setPreset('month')" id="btn-month" class="tab-btn flex-1 lg:flex-none px-6 py-2 rounded-lg text-sm font-bold">Mes</button>
+        <div class="flex flex-col xl:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex gap-1 w-full xl:w-auto bg-slate-100 p-1 rounded-xl">
+                <button onclick="setPreset('day')" id="btn-day" class="tab-btn active flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Hoy</button>
+                <button onclick="setPreset('week')" id="btn-week" class="tab-btn flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Semana</button>
+                <button onclick="setPreset('month')" id="btn-month" class="tab-btn flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Mes</button>
             </div>
 
-            <div class="flex flex-col sm:flex-row items-center gap-4 w-full lg:w-auto">
-                <div class="flex items-center gap-2">
-                    <label class="font-semibold text-xs text-slate-500 uppercase tracking-wide">Desde</label>
-                    <input type="datetime-local" id="startDatetime" class="border border-slate-300 rounded-lg p-2 text-sm outline-none focus:border-[#004b87] focus:ring-1 focus:ring-[#004b87] transition-all">
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-full sm:w-auto">
+                    <label class="font-bold text-[10px] text-slate-400 uppercase">Desde</label>
+                    <input type="datetime-local" id="startDatetime" class="bg-transparent border-none text-sm outline-none w-full">
                 </div>
-                <div class="flex items-center gap-2">
-                    <label class="font-semibold text-xs text-slate-500 uppercase tracking-wide">Hasta</label>
-                    <input type="datetime-local" id="endDatetime" class="border border-slate-300 rounded-lg p-2 text-sm outline-none focus:border-[#004b87] focus:ring-1 focus:ring-[#004b87] transition-all">
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 w-full sm:w-auto">
+                    <label class="font-bold text-[10px] text-slate-400 uppercase">Hasta</label>
+                    <input type="datetime-local" id="endDatetime" class="bg-transparent border-none text-sm outline-none w-full">
                 </div>
-                <button onclick="updateDashboard(true)" class="bg-[#004b87] hover:bg-[#003865] text-white px-6 py-2 rounded-lg transition-all font-bold shadow-md w-full sm:w-auto flex items-center justify-center">
-                    <i class="fa-solid fa-filter mr-2"></i>Filtrar
+                <button onclick="updateDashboard(true)" class="bg-[#004b87] hover:bg-[#003865] text-white px-5 py-2.5 rounded-lg transition-colors font-bold shadow-md w-full sm:w-auto flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-magnifying-glass mr-2"></i>Consultar
                 </button>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 mb-8">
-            <div class="card p-8 border-l-8 border-l-[#004b87] relative overflow-hidden">
-                <i class="fa-solid fa-cloud-showers-heavy absolute -right-4 -bottom-4 text-9xl text-slate-50 opacity-50 z-0"></i>
-                
-                <div class="relative z-10">
-                    <div class="flex justify-between items-start mb-4">
-                        <p class="card-title">PRECIPITACIÓN ACUMULADA - EMA EP 23</p>
-                        <span id="channelBadge" class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded tracking-wider">Sincronizando...</span>
-                    </div>
-                    
-                    <div class="flex items-baseline gap-3">
-                        <p class="stat-value" id="accumVioleta">0.00</p>
-                        <span class="text-slate-500 font-bold text-2xl">mm</span>
-                    </div>
-                    
-                    <div class="mt-4 flex items-center gap-2 text-sm text-slate-500">
-                        <i class="fa-solid fa-circle-info text-blue-400"></i>
-                        <span id="msgVioleta">Calculando ciclos completos de cangilones (Factor: 0.68mm)...</span>
-                    </div>
+        <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+            <div class="card p-5 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="metric-title">Temperatura</span>
+                    <i class="fa-solid fa-temperature-half text-orange-500 opacity-80"></i>
                 </div>
-            </div>
-        </div>
-
-        <div class="card p-6 mb-8 shadow-sm min-h-[450px]">
-            <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-slate-100 pb-4">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-800" id="chartTitle">Curva de Precipitación del Evento</h3>
-                    <p class="text-sm text-slate-500 mt-1" id="chartSubtitle"></p>
-                </div>
-                <button onclick="downloadData()" class="mt-4 sm:mt-0 text-sm text-[#004b87] hover:text-[#003865] font-semibold flex items-center">
-                    <i class="fa-solid fa-download mr-1"></i> Exportar Gráfico
-                </button>
-            </div>
-            <div id="chartParent" class="relative w-full h-[380px]">
-                <canvas id="precipChart"></canvas>
-            </div>
-        </div>
-
-        <div id="debugInfo" class="text-xs font-medium text-slate-400 text-center uppercase tracking-widest pb-8">
-            Sistema de Monitoreo - Calibración Doble Pulso (0.68) - EP 23
-        </div>
-    </div>
-
-    <script>
-        /**
-         * CONFIGURACIÓN DE LOS CANALES DE THINGSPEAK (Ex EMA Violeta)
-         * Factor mult ajustado a 0.68 para el ciclo completo
-         */
-        const V_ACTUAL = { id: "2626952", api: "4XYH56YSV64HE17H", mult: 0.68, field: 5 };
-        const V_HISTORICO = { id: "1778165", api: "OJ1JHKAPCCIQB4CB", mult: 0.68, field: 5 }; 
-
-        let myChart = null;
-
-        function toDatetimeLocal(date) {
-            const pad = (n) => n.toString().padStart(2, '0');
-            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-        }
-
-        function setPreset(range) {
-            const now = new Date();
-            const endStr = toDatetimeLocal(now);
-            const start = new Date(now);
-
-            if (range === 'day') {
-                start.setHours(0, 0, 0, 0); 
-            } else if (range === 'week') {
-                start.setDate(start.getDate() - 7);
-                start.setHours(0, 0, 0, 0);
-            } else if (range === 'month') {
-                start.setDate(start.getDate() - 30);
-                start.setHours(0, 0, 0, 0);
-            }
-
-            document.getElementById('startDatetime').value = toDatetimeLocal(start);
-            document.getElementById('endDatetime').value = endStr;
-
-            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            if(range) {
-                const btn = document.getElementById('btn-' + range);
-                if(btn) btn.classList.add('active');
-            }
-
-            updateDashboard();
-        }
-
-        async function fetchFeeds(station, startStr, endStr) {
-            const tsStart = startStr.replace('T', '%20') + ':00';
-            const tsEnd = endStr.replace('T', '%20') + ':59';
-            
-            const url = `https://api.thingspeak.com/channels/${station.id}/fields/${station.field}.json?api_key=${station.api}&start=${tsStart}&end=${tsEnd}&timezone=America/Argentina/Buenos_Aires&results=8000`;
-            try {
-                const res = await fetch(url);
-                const data = await res.json();
-                return { feeds: data.feeds || [], field: station.field, id: station.id };
-            } catch (e) {
-                console.error("Error consultando ThingSpeak:", e);
-                return { feeds: [], field: station.field, id: station.id };
-            }
-        }
-
-        function processStationData(allFeedsData, mult, startStr, endStr) {
-            const start = new Date(startStr);
-            const end = new Date(endStr);
-            const diffHours = (end - start) / 3600000;
-            
-            const bucketByHour = diffHours <= 72; 
-            const buckets = new Map();
-            let current = new Date(start);
-
-            if (bucketByHour) {
-                current.setMinutes(0, 0, 0);
-                while (current <= end) {
-                    const pad = (n) => n.toString().padStart(2, '0');
-                    const key = `${pad(current.getDate())}/${pad(current.getMonth()+1)} ${pad(current.getHours())}:00`;
-                    buckets.set(key, 0);
-                    current.setHours(current.getHours() + 1);
-                }
-            } else {
-                current.setHours(0, 0, 0, 0);
-                while (current <= end) {
-                    const pad = (n) => n.toString().padStart(2, '0');
-                    const key = `${pad(current.getDate())}/${pad(current.getMonth()+1)}/${current.getFullYear()}`;
-                    buckets.set(key, 0);
-                    current.setDate(current.getDate() + 1);
-                }
-            }
-
-            let totalPeriod = 0;
-            let recordsCount = 0;
-            const seenTimestamps = new Set();
-
-            allFeedsData.forEach(source => {
-                const fieldKey = "field" + source.field;
-                source.feeds.forEach(f => {
-                    const val = parseFloat(f[fieldKey]);
-                    const ts = f.created_at;
-
-                    if (!isNaN(val) && val > 0 && !seenTimestamps.has(ts)) {
-                        seenTimestamps.add(ts);
-                        let amount = mult;
-                        
-                        totalPeriod += amount;
-                        recordsCount++;
-                        
-                        const dateObj = new Date(ts);
-                        const pad = (n) => n.toString().padStart(2, '0');
-                        let key = "";
-                        
-                        if (bucketByHour) {
-                             key = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)} ${pad(dateObj.getHours())}:00`;
-                        } else {
-                             key = `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)}/${dateObj.getFullYear()}`;
-                        }
-
-                        if (buckets.has(key)) {
-                            buckets.set(key, buckets.get(key) + amount);
-                        }
-                    }
-                });
-            });
-
-            const labels = Array.from(buckets.keys());
-            const chartData = [];
-            let runningSum = 0;
-            
-            for (let [key, val] of buckets) {
-                runningSum += val;
-                chartData.push(runningSum);
-            }
-
-            return { total: totalPeriod.toFixed(2), chartData, labels, recordsCount };
-        }
-
-        async function updateDashboard(isManual = false) {
-            if (isManual) {
-                document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-            }
-
-            const startStr = document.getElementById('startDatetime').value;
-            const endStr = document.getElementById('endDatetime').value;
-            const subtitle = document.getElementById('chartSubtitle');
-            
-            if (!startStr || !endStr) return;
-
-            const startDateObj = new Date(startStr);
-            const endDateObj = new Date(endStr);
-
-            if(startDateObj > endDateObj) {
-                alert("La fecha de inicio no puede ser mayor a la fecha de fin.");
-                return;
-            }
-
-            subtitle.innerHTML = `<i class="fa-regular fa-calendar mr-1"></i> Rango analizado: ${startStr.replace('T', ' ')} hrs a ${endStr.replace('T', ' ')} hrs`;
-
-            const [resVActual, resVHist] = await Promise.all([
-                fetchFeeds(V_ACTUAL, startStr, endStr),
-                fetchFeeds(V_HISTORICO, startStr, endStr)
-            ]);
-
-            const resV = processStationData([resVActual, resVHist], V_ACTUAL.mult, startStr, endStr);
-
-            document.getElementById('accumVioleta').innerText = resV.total;
-            document.getElementById('msgVioleta').innerText = `Registros computados: ${resV.recordsCount} ciclos (Multiplicador: 0.68mm)`;
-            
-            const badge = document.getElementById('channelBadge');
-            if (resVActual.feeds.length > 0) {
-                badge.innerText = "TELEMETRÍA EN LÍNEA";
-                badge.className = "bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded tracking-wider border border-emerald-200";
-            } else if (resVHist.feeds.length > 0) {
-                badge.innerText = "DATOS HISTÓRICOS";
-                badge.className = "bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded tracking-wider border border-amber-200";
-            } else {
-                badge.innerText = "SIN DATOS EN RANGO";
-                badge.className = "bg-slate-100 text-slate-600 text-[10px] font-bold px-2 py-1 rounded tracking-wider border border-slate-300";
-            }
-
-            if (typeof Chart !== 'undefined') renderChart(resV);
-        }
-
-        function renderChart(resV) {
-            const ctx = document.getElementById('precipChart').getContext('2d');
-            if (myChart) myChart.destroy();
-
-            const pointRad = resV.labels.length > 50 ? 1 : 4;
-
-            myChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: resV.labels,
-                    datasets: [
-                        {
-                            label: 'Precipitación Acumulada (mm) - EP 23',
-                            data: resV.chartData,
-                            borderColor: '#004b87',
-                            backgroundColor: 'rgba(0, 75, 135, 0.08)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.3,
-                            pointBackgroundColor: '#ffffff',
-                            pointBorderColor: '#004b87',
-                            pointBorderWidth: 2,
-                            pointRadius: pointRad,
-                            pointHoverRadius: 6
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { 
-                        legend: { 
-                            display: true, 
-                            position: 'top',
-                            labels: { color: '#475569', font: { family: 'Inter', weight: '600' } } 
-                        },
-                        tooltip: { 
-                            mode: 'index', 
-                            intersect: false,
-                            backgroundColor: '#1e293b',
-                            titleFont: { family: 'Inter', size: 13 },
-                            bodyFont: { family: 'Inter', size: 14, weight: 'bold' },
-                            padding: 12,
-                            cornerRadius: 8
-                        }
-                    },
-                    interaction: {
-                        mode: 'nearest',
-                        axis: 'x',
-                        intersect: false
-                    },
-                    scales: {
-                        y: { 
-                            beginAtZero: true, 
-                            grid: { color: '#f1f5f9', drawBorder: false },
-                            ticks: { 
-                                color: '#64748b', 
-                                font: { family: 'Inter' },
-                                callback: (v) => v.toFixed(1) + ' mm' 
-                            }
-                        },
-                        x: { 
-                            grid: { display: false },
-                            ticks: { 
-                                color: '#64748b',
-                                font: { family: 'Inter' },
-                                maxTicksLimit: 12 
-                            }
-                        }
-                    }
-                }
-            });
-        }
-
-        function downloadData() {
-            if(!myChart) return;
-            const a = document.createElement('a');
-            a.href = myChart.toBase64Image();
-            a.download = 'grafico-precipitacion-ep23.png';
-            a.click();
-        }
-
-        // Inicialización
-        window.addEventListener('load', () => {
-            const checkChart = setInterval(() => {
-                if (typeof Chart !== 'undefined') {
-                    clearInterval(checkChart);
-                    setPreset('day');
-                }
-            }, 100);
-        });
-    </script>
-</body>
-</html>
+                <div class="flex items-baseline gap-1 relative
