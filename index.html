@@ -13,7 +13,7 @@
         
         body { 
             font-family: 'Inter', sans-serif; 
-            background-color: #f1f5f9; /* Fondo gris muy claro para contraste */
+            background-color: #f1f5f9; 
             color: #334155; 
             margin: 0; 
             overflow-x: hidden;
@@ -69,11 +69,6 @@
         ::-webkit-scrollbar-track { background: #e2e8f0; }
         ::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #64748b; }
-        
-        input[type="datetime-local"] {
-            color: #1e293b;
-            background-color: #ffffff;
-        }
     </style>
 </head>
 <body class="p-4 md:p-6 lg:p-8">
@@ -92,7 +87,7 @@
             
             <div class="flex flex-col items-end gap-2">
                 <span id="systemStatus" class="bg-slate-100 text-slate-600 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide border border-slate-200">
-                    <i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Cargando datos...
+                    <i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Cargando...
                 </span>
                 <span class="text-[10px] text-slate-400 font-medium">Factor Pluviómetro: 0.68mm</span>
             </div>
@@ -100,9 +95,9 @@
 
         <div class="flex flex-col xl:flex-row justify-between items-center gap-4 mb-6 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex gap-1 w-full xl:w-auto bg-slate-100 p-1 rounded-xl">
-                <button onclick="setPreset('day')" id="btn-day" class="tab-btn active flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Hoy</button>
-                <button onclick="setPreset('week')" id="btn-week" class="tab-btn flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Semana</button>
-                <button onclick="setPreset('month')" id="btn-month" class="tab-btn flex-1 xl:flex-none px-6 py-2 text-sm font-bold">Mes</button>
+                <button onclick="setPreset('day')" id="btn-day" class="tab-btn active px-6 py-2 text-sm font-bold">Hoy</button>
+                <button onclick="setPreset('week')" id="btn-week" class="tab-btn px-6 py-2 text-sm font-bold">Semana</button>
+                <button onclick="setPreset('month')" id="btn-month" class="tab-btn px-6 py-2 text-sm font-bold">Mes</button>
             </div>
 
             <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
@@ -126,4 +121,334 @@
                     <span class="metric-title">Temperatura</span>
                     <i class="fa-solid fa-temperature-half text-orange-500 opacity-80"></i>
                 </div>
-                <div class="flex items-baseline gap-1 relative
+                <div class="flex items-baseline gap-1 relative z-10">
+                    <span class="metric-value text-slate-800" id="valTemp">--</span>
+                    <span class="text-slate-500 font-semibold text-lg">°C</span>
+                </div>
+            </div>
+
+            <div class="card p-5 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="metric-title">Humedad</span>
+                    <i class="fa-solid fa-droplet text-blue-500 opacity-80"></i>
+                </div>
+                <div class="flex items-baseline gap-1 relative z-10">
+                    <span class="metric-value text-slate-800" id="valHum">--</span>
+                    <span class="text-slate-500 font-semibold text-lg">%</span>
+                </div>
+            </div>
+
+            <div class="card p-5 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="metric-title">Hum. Suelo</span>
+                    <i class="fa-solid fa-seedling text-emerald-500 opacity-80"></i>
+                </div>
+                <div class="flex items-baseline gap-1 relative z-10">
+                    <span class="metric-value text-slate-800" id="valHumTierra">--</span>
+                    <span class="text-slate-500 font-semibold text-lg">%</span>
+                </div>
+            </div>
+
+            <div class="card p-5 relative overflow-hidden">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="metric-title">Presión Abs.</span>
+                    <i class="fa-solid fa-gauge-high text-purple-500 opacity-80"></i>
+                </div>
+                <div class="flex items-baseline gap-1 relative z-10">
+                    <span class="metric-value text-slate-800" id="valPres">--</span>
+                    <span class="text-slate-500 font-semibold text-sm">hPa</span>
+                </div>
+            </div>
+
+            <div class="card p-5 relative overflow-hidden bg-gradient-to-br from-[#004b87] to-[#003865] border-none text-white col-span-2 lg:col-span-1 shadow-lg">
+                <div class="flex justify-between items-start mb-2">
+                    <span class="metric-title text-blue-200">Lluvia Acum.</span>
+                    <i class="fa-solid fa-cloud-showers-heavy text-white opacity-80"></i>
+                </div>
+                <div class="flex items-baseline gap-1 relative z-10">
+                    <span class="metric-value text-white" id="valPrecip">0.0</span>
+                    <span class="text-blue-200 font-semibold text-lg">mm</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+            <div class="card p-5 col-span-1 lg:col-span-2">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4"><i class="fa-solid fa-chart-column mr-2 text-[#004b87]"></i>Curva de Precipitación</h3>
+                <div class="relative w-full h-[300px]">
+                    <canvas id="chartPrecip"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-5">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4"><i class="fa-solid fa-temperature-three-quarters mr-2 text-orange-500"></i>Termohigrómetro</h3>
+                <div class="relative w-full h-[250px]">
+                    <canvas id="chartTempHum"></canvas>
+                </div>
+            </div>
+
+            <div class="card p-5">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4"><i class="fa-solid fa-gauge mr-2 text-purple-500"></i>Presión Atmosférica</h3>
+                <div class="relative w-full h-[250px]">
+                    <canvas id="chartPres"></canvas>
+                </div>
+            </div>
+            
+            <div class="card p-5 col-span-1 lg:col-span-2">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4"><i class="fa-solid fa-leaf mr-2 text-emerald-500"></i>Humedad de Suelo</h3>
+                <div class="relative w-full h-[200px]">
+                    <canvas id="chartSoil"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-[10px] font-semibold text-slate-400 text-center uppercase tracking-widest pb-8">
+            Proyecto de Extensión UNLP - Monitoreo Ambiental Institucional
+        </footer>
+    </div>
+
+    <script>
+        const V_ACTUAL = { id: "2626952", api: "4XYH56YSV64HE17H" };
+        const V_HISTORICO = { id: "1778165", api: "OJ1JHKAPCCIQB4CB" }; 
+        const MULT_PRECIP = 0.68;
+
+        let charts = {};
+
+        function toDatetimeLocal(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function setPreset(range) {
+            const now = new Date();
+            const endStr = toDatetimeLocal(now);
+            const start = new Date(now);
+
+            if (range === 'day') { start.setHours(0, 0, 0, 0); } 
+            else if (range === 'week') { start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); } 
+            else if (range === 'month') { start.setDate(start.getDate() - 30); start.setHours(0, 0, 0, 0); }
+
+            document.getElementById('startDatetime').value = toDatetimeLocal(start);
+            document.getElementById('endDatetime').value = endStr;
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-' + range);
+            if(btn) btn.classList.add('active');
+
+            updateDashboard();
+        }
+
+        async function fetchAllFeeds(station, startStr, endStr) {
+            const tsStart = startStr.replace('T', '%20') + ':00';
+            const tsEnd = endStr.replace('T', '%20') + ':59';
+            const url = `https://api.thingspeak.com/channels/${station.id}/feeds.json?api_key=${station.api}&start=${tsStart}&end=${tsEnd}&timezone=America/Argentina/Buenos_Aires&results=8000`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                return data.feeds || [];
+            } catch (e) {
+                return [];
+            }
+        }
+
+        function updateUIStatus(status) {
+            const badge = document.getElementById('systemStatus');
+            if (status === 'loading') {
+                badge.innerHTML = '<i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Sincronizando...';
+                badge.className = "bg-blue-100 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide border border-blue-200";
+            } else if (status === 'online') {
+                badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> En Línea';
+                badge.className = "bg-emerald-100 text-emerald-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide border border-emerald-200";
+            } else if (status === 'historical') {
+                badge.innerHTML = '<i class="fa-solid fa-clock-rotate-left mr-1"></i> Histórico';
+                badge.className = "bg-amber-100 text-amber-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide border border-amber-200";
+            }
+        }
+
+        async function updateDashboard(isManual = false) {
+            if (isManual) document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            const startStr = document.getElementById('startDatetime').value;
+            const endStr = document.getElementById('endDatetime').value;
+            
+            if (!startStr || !endStr) return;
+
+            updateUIStatus('loading');
+
+            const [feedsActual, feedsHist] = await Promise.all([
+                fetchAllFeeds(V_ACTUAL, startStr, endStr),
+                fetchAllFeeds(V_HISTORICO, startStr, endStr)
+            ]);
+
+            let allFeeds = [...feedsHist, ...feedsActual];
+            const uniqueFeedsMap = new Map();
+            allFeeds.forEach(f => uniqueFeedsMap.set(f.created_at, f));
+            allFeeds = Array.from(uniqueFeedsMap.values()).sort((a, b) => new Date(a.created_at) - new Date(b.created_at));
+
+            if (feedsActual.length > 0) updateUIStatus('online');
+            else if (feedsHist.length > 0) updateUIStatus('historical');
+
+            processData(allFeeds, startStr, endStr);
+        }
+
+        function processData(feeds, startStr, endStr) {
+            const labels = [];
+            const dataTemp = []; const dataHum = []; const dataSoil = []; const dataPres = [];
+            let lastTemp = "--", lastHum = "--", lastSoil = "--", lastPres = "--";
+
+            const start = new Date(startStr); const end = new Date(endStr);
+            const diffHours = (end - start) / 3600000;
+            const bucketByHour = diffHours <= 72; 
+            const precipBuckets = new Map();
+            let current = new Date(start);
+
+            if (bucketByHour) {
+                current.setMinutes(0, 0, 0);
+                while (current <= end) {
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    precipBuckets.set(`${pad(current.getDate())}/${pad(current.getMonth()+1)} ${pad(current.getHours())}:00`, 0);
+                    current.setHours(current.getHours() + 1);
+                }
+            } else {
+                current.setHours(0, 0, 0, 0);
+                while (current <= end) {
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    precipBuckets.set(`${pad(current.getDate())}/${pad(current.getMonth()+1)}/${current.getFullYear()}`, 0);
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+
+            let accumRain = 0;
+
+            feeds.forEach(f => {
+                const dateObj = new Date(f.created_at);
+                const pad = (n) => n.toString().padStart(2, '0');
+                const timeLabel = diffHours <= 72 
+                    ? `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}` 
+                    : `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)}`;
+
+                labels.push(timeLabel);
+
+                const temp = parseFloat(f.field1);
+                const hum = parseFloat(f.field2);
+                const soil = parseFloat(f.field3);
+                const rainPulse = parseFloat(f.field5);
+                const pres = parseFloat(f.field6);
+
+                if(!isNaN(temp)) { dataTemp.push(temp); lastTemp = temp.toFixed(1); }
+                if(!isNaN(hum)) { dataHum.push(hum); lastHum = hum.toFixed(0); }
+                if(!isNaN(soil)) { dataSoil.push(soil); lastSoil = soil.toFixed(0); }
+                if(!isNaN(pres)) { dataPres.push(pres); lastPres = pres.toFixed(1); }
+
+                if(!isNaN(rainPulse) && rainPulse > 0) {
+                    accumRain += MULT_PRECIP;
+                    let bKey = bucketByHour 
+                        ? `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)} ${pad(dateObj.getHours())}:00`
+                        : `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)}/${dateObj.getFullYear()}`;
+                    if (precipBuckets.has(bKey)) {
+                        precipBuckets.set(bKey, precipBuckets.get(bKey) + MULT_PRECIP);
+                    }
+                }
+            });
+
+            const precipLabels = Array.from(precipBuckets.keys());
+            const precipData = [];
+            let runningSum = 0;
+            for (let [k, val] of precipBuckets) {
+                runningSum += val;
+                precipData.push(runningSum);
+            }
+
+            document.getElementById('valTemp').innerText = lastTemp;
+            document.getElementById('valHum').innerText = lastHum;
+            document.getElementById('valHumTierra').innerText = lastSoil;
+            document.getElementById('valPres').innerText = lastPres;
+            document.getElementById('valPrecip').innerText = accumRain.toFixed(1);
+
+            renderPrecipChart(precipLabels, precipData);
+            renderTempHumChart(labels, dataTemp, dataHum);
+            renderPresChart(labels, dataPres);
+            renderSoilChart(labels, dataSoil);
+        }
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { font: { family: 'Inter', size: 11 }, usePointStyle: true, boxWidth: 6 } }
+            },
+            elements: { point: { radius: 0, hitRadius: 8 } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxTicksLimit: 6, color: '#94a3b8', font: {family: 'Inter', size: 10} } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: 'Inter', size: 10} } }
+            }
+        };
+
+        function renderPrecipChart(labels, data) {
+            const ctx = document.getElementById('chartPrecip').getContext('2d');
+            if (charts.precip) charts.precip.destroy();
+            charts.precip = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Lluvia Acumulada (mm)', data: data, borderColor: '#004b87', backgroundColor: 'rgba(0, 75, 135, 0.05)', borderWidth: 2, fill: true, stepped: true }]
+                },
+                options: commonOptions
+            });
+        }
+
+        function renderTempHumChart(labels, temp, hum) {
+            const ctx = document.getElementById('chartTempHum').getContext('2d');
+            if (charts.temphum) charts.temphum.destroy();
+            charts.temphum = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Temp (°C)', data: temp, borderColor: '#f97316', borderWidth: 2, yAxisID: 'y' },
+                        { label: 'Hum (%)', data: hum, borderColor: '#3b82f6', borderWidth: 2, yAxisID: 'y1' }
+                    ]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: commonOptions.scales.x,
+                        y: { type: 'linear', display: true, position: 'left' },
+                        y1: { type: 'linear', display: true, position: 'right', min: 0, max: 100, grid: { drawOnChartArea: false } }
+                    }
+                }
+            });
+        }
+
+        function renderPresChart(labels, pres) {
+            const ctx = document.getElementById('chartPres').getContext('2d');
+            if (charts.pres) charts.pres.destroy();
+            charts.pres = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Presión (hPa)', data: pres, borderColor: '#a855f7', borderWidth: 2 }]
+                },
+                options: commonOptions
+            });
+        }
+
+        function renderSoilChart(labels, soil) {
+            const ctx = document.getElementById('chartSoil').getContext('2d');
+            if (charts.soil) charts.soil.destroy();
+            charts.soil = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Hum. Suelo (%)', data: soil, borderColor: '#10b981', borderWidth: 2, tension: 0.2 }]
+                },
+                options: commonOptions
+            });
+        }
+
+        window.addEventListener('load', () => {
+            setPreset('day');
+        });
+    </script>
+</body>
+</html>
