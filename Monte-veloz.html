@@ -1,15 +1,11 @@
-
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monitoreo Meteorológico - EMA Monte Veloz</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     
     <style>
@@ -97,7 +93,6 @@
 
     <div class="max-w-7xl mx-auto space-y-6">
         
-        <!-- Encabezado -->
         <header class="bg-white p-6 rounded-2xl border border-slate-200 border-t-4 border-t-[#0f766e] shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
             <div class="flex items-center gap-5 w-full md:w-auto">
                 <div class="w-16 h-16 bg-teal-50 rounded-xl flex items-center justify-center border border-teal-100 shrink-0">
@@ -105,7 +100,7 @@
                 </div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-800 tracking-tight">Red de Monitoreo Ambiental</h1>
-                    <p class="text-slate-500 font-semibold text-sm mt-1"><i class="fa-solid fa-location-dot mr-1"></i> EMA Monte Veloz (Ruta 36)</p>
+                    <p class="text-slate-500 font-semibold text-sm mt-1"><i class="fa-solid fa-location-dot mr-1"></i> EMA Monte Veloz</p>
                 </div>
             </div>
             
@@ -117,7 +112,6 @@
             </div>
         </header>
 
-        <!-- Filtros de Tiempo -->
         <div class="flex flex-col xl:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
             <div class="flex gap-2 w-full xl:w-auto bg-slate-50 p-1.5 rounded-lg border border-slate-100">
                 <button onclick="setPreset('day')" id="btn-day" class="tab-btn active px-6 py-2 text-sm font-bold rounded-md flex-1">Hoy</button>
@@ -140,10 +134,8 @@
             </div>
         </div>
 
-        <!-- TARJETAS DE MÉTRICAS (7 Variables) -->
-        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-4">
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-6 gap-4">
             
-            <!-- Temperatura -->
             <div class="metric-card border-t-[#ea580c]">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title">Temp.</span>
@@ -155,19 +147,6 @@
                 </div>
             </div>
 
-            <!-- Punto de Rocío -->
-            <div class="metric-card border-t-[#0d9488]">
-                <div class="flex justify-between items-start mb-4">
-                    <span class="metric-title">P. Rocío</span>
-                    <i class="fa-solid fa-droplet-slash text-[#0d9488] opacity-80 text-lg"></i>
-                </div>
-                <div class="flex items-baseline">
-                    <span class="metric-value" id="valDew">--</span>
-                    <span class="metric-unit">°C</span>
-                </div>
-            </div>
-
-            <!-- Humedad -->
             <div class="metric-card border-t-[#0284c7]">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title">Humedad</span>
@@ -179,7 +158,6 @@
                 </div>
             </div>
 
-            <!-- Presión -->
             <div class="metric-card border-t-[#9333ea]">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title">Presión</span>
@@ -191,7 +169,6 @@
                 </div>
             </div>
 
-            <!-- Velocidad Viento -->
             <div class="metric-card border-t-[#64748b]">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title">Viento</span>
@@ -203,7 +180,6 @@
                 </div>
             </div>
 
-            <!-- Dirección Viento -->
             <div class="metric-card border-t-[#4f46e5]">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title">Dir. Viento</span>
@@ -212,15 +188,13 @@
                 <div class="flex items-center gap-2">
                     <span class="metric-value" id="valWindDir">--</span>
                     <span class="metric-unit">°</span>
-                    <!-- Indicador Rotativo -->
                     <div id="dirArrowContainer" class="hidden ml-auto w-8 h-8 rounded-full border border-indigo-100 bg-indigo-50 flex items-center justify-center">
                         <i id="dirArrow" class="fa-solid fa-arrow-up text-indigo-600 transition-transform duration-700"></i>
                     </div>
                 </div>
             </div>
 
-            <!-- Lluvia Acumulada -->
-            <div class="metric-card border-t-[#0f766e] bg-slate-50 col-span-2 md:col-span-1">
+            <div class="metric-card border-t-[#0f766e] bg-slate-50">
                 <div class="flex justify-between items-start mb-4">
                     <span class="metric-title text-[#0f766e]">Lluvia Acum.</span>
                     <i class="fa-solid fa-cloud-showers-heavy text-[#0f766e] opacity-80 text-lg"></i>
@@ -233,20 +207,17 @@
 
         </div>
 
-        <!-- SECCIÓN DE GRÁFICOS -->
         <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
             
-            <!-- Gráfico: Temp y Punto de Rocío -->
             <div class="chart-card">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
-                    <i class="fa-solid fa-temperature-full mr-2 text-[#ea580c]"></i> Temperatura y Punto de Rocío
+                    <i class="fa-solid fa-temperature-full mr-2 text-[#ea580c]"></i> Temperatura
                 </h3>
                 <div class="relative w-full h-[250px]">
-                    <canvas id="chartTempDew"></canvas>
+                    <canvas id="chartTemp"></canvas>
                 </div>
             </div>
 
-            <!-- Gráfico: Precipitación Acumulada -->
             <div class="chart-card">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
                     <i class="fa-solid fa-chart-column mr-2 text-[#0f766e]"></i> Curva de Lluvia
@@ -256,7 +227,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico: Presión Atmosférica -->
             <div class="chart-card">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
                     <i class="fa-solid fa-gauge mr-2 text-[#9333ea]"></i> Presión Atmosférica
@@ -266,7 +236,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico: Humedad -->
             <div class="chart-card">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
                     <i class="fa-solid fa-droplet mr-2 text-[#0284c7]"></i> Humedad Relativa
@@ -276,7 +245,6 @@
                 </div>
             </div>
 
-            <!-- Gráfico: Viento (Velocidad) -->
             <div class="chart-card col-span-1 xl:col-span-2 mb-8">
                 <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
                     <i class="fa-solid fa-wind mr-2 text-[#64748b]"></i> Velocidad del Viento
@@ -291,9 +259,9 @@
     </div>
 
     <script>
-        // Configuración específica de Monte Veloz (3149195)
+        // Configuración de Monte Veloz (3149195)
         const M_VELOZ = { id: "3149195" }; 
-        const MULT_PRECIP = 1; // Asumimos multiplicador directo o suma bruta (modificar si los pulsos valen distinto)
+        const MULT_PRECIP = 1; // Ajustar si el factor del pluviómetro es distinto a 1
 
         let charts = {};
 
@@ -324,7 +292,6 @@
         async function fetchFeeds(station, startStr, endStr) {
             const tsStart = startStr.replace('T', '%20') + ':00';
             const tsEnd = endStr.replace('T', '%20') + ':59';
-            // Sin API Key, asumiendo canal público
             const url = `https://api.thingspeak.com/channels/${station.id}/feeds.json?start=${tsStart}&end=${tsEnd}&timezone=America/Argentina/Buenos_Aires&results=8000`;
             try {
                 const res = await fetch(url);
@@ -371,12 +338,12 @@
         function processData(feeds, startStr, endStr) {
             const labels = [];
             const dataTemp = [], dataHum = [], dataPres = [];
-            const dataWind = [], dataRain = [], dataDew = [];
+            const dataWind = [], dataRain = [];
             
             let lastTemp = "--", lastHum = "--", lastPres = "--";
-            let lastWind = "--", lastWindDir = "--", lastDew = "--";
+            let lastWind = "--", lastWindDir = "--";
 
-            // Lógica de empaquetado para Lluvia Acumulada
+            // Acumulación de lluvia
             const start = new Date(startStr); const end = new Date(endStr);
             const diffHours = (end - start) / 3600000;
             const bucketByHour = diffHours <= 72; 
@@ -410,21 +377,17 @@
 
                 labels.push(timeLabel);
 
-                /* MAPEADO ESPECÍFICO DE MONTE VELOZ (3149195) */
                 const temp = parseFloat(f.field1);
                 const hum = parseFloat(f.field2);
-                const pres = parseFloat(f.field3);
+                const pres = parseFloat(f.field3); // Tomamos el valor crudo como indicaste
                 const wind = parseFloat(f.field4);
                 const windDir = parseFloat(f.field5);
                 const rain = parseFloat(f.field6);
-                const dew = parseFloat(f.field7);
 
                 if(!isNaN(temp)) { dataTemp.push(temp); lastTemp = temp.toFixed(1); } else { dataTemp.push(null); }
                 if(!isNaN(hum)) { dataHum.push(hum); lastHum = hum.toFixed(0); } else { dataHum.push(null); }
                 if(!isNaN(pres)) { dataPres.push(pres); lastPres = pres.toFixed(1); } else { dataPres.push(null); }
                 if(!isNaN(wind)) { dataWind.push(wind); lastWind = wind.toFixed(1); } else { dataWind.push(null); }
-                if(!isNaN(dew)) { dataDew.push(dew); lastDew = dew.toFixed(1); } else { dataDew.push(null); }
-                
                 if(!isNaN(windDir)) { lastWindDir = windDir.toFixed(0); }
 
                 // Procesamiento Acumulado de Lluvia
@@ -447,13 +410,11 @@
                 precipData.push(runningSum);
             }
 
-            // Actualizar Tarjetas UI
             document.getElementById('valTemp').innerText = lastTemp;
             document.getElementById('valHum').innerText = lastHum;
             document.getElementById('valPres').innerText = lastPres;
             document.getElementById('valWind').innerText = lastWind;
             document.getElementById('valWindDir').innerText = lastWindDir;
-            document.getElementById('valDew').innerText = lastDew;
             document.getElementById('valPrecip').innerText = accumRain.toFixed(1);
 
             // Rotar Flecha del Viento
@@ -466,8 +427,7 @@
                 dirArrowContainer.classList.add('hidden');
             }
 
-            // Render Gráficos
-            renderTempDewChart(labels, dataTemp, dataDew);
+            renderTempChart(labels, dataTemp);
             renderPrecipChart(precipLabels, precipData);
             renderPresChart(labels, dataPres);
             renderHumChart(labels, dataHum);
@@ -488,16 +448,15 @@
             }
         };
 
-        function renderTempDewChart(labels, temp, dew) {
-            const ctx = document.getElementById('chartTempDew').getContext('2d');
-            if (charts.tempdew) charts.tempdew.destroy();
-            charts.tempdew = new Chart(ctx, {
+        function renderTempChart(labels, temp) {
+            const ctx = document.getElementById('chartTemp').getContext('2d');
+            if (charts.temp) charts.temp.destroy();
+            charts.temp = new Chart(ctx, {
                 type: 'line',
                 data: {
                     labels: labels,
                     datasets: [
-                        { label: 'Temperatura (°C)', data: temp, borderColor: '#ea580c', backgroundColor: 'rgba(234, 88, 12, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
-                        { label: 'Punto de Rocío (°C)', data: dew, borderColor: '#0d9488', borderDash: [5, 5], borderWidth: 2, tension: 0.3 }
+                        { label: 'Temperatura (°C)', data: temp, borderColor: '#ea580c', backgroundColor: 'rgba(234, 88, 12, 0.1)', borderWidth: 2, fill: true, tension: 0.3 }
                     ]
                 },
                 options: commonOptions
