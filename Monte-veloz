@@ -1,1 +1,564 @@
 
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitoreo Meteorológico - EMA Monte Veloz</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
+        
+        body { 
+            font-family: 'Inter', sans-serif; 
+            background-color: #f8fafc; 
+            color: #334155; 
+            margin: 0; 
+            overflow-x: hidden;
+        }
+
+        /* Tarjetas de Dashboard Institucional */
+        .metric-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-top-width: 4px;
+            border-radius: 12px;
+            padding: 1.25rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .metric-card:hover {
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            transform: translateY(-2px);
+        }
+
+        .metric-title {
+            font-size: 0.70rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #64748b;
+        }
+
+        .metric-value {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: #0f172a;
+            line-height: 1;
+            letter-spacing: -0.02em;
+        }
+
+        .metric-unit {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #94a3b8;
+            margin-left: 0.25rem;
+        }
+
+        .chart-card {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+        }
+
+        .tab-btn {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid transparent;
+            transition: all 0.2s ease;
+        }
+
+        .tab-btn:hover { background-color: #e2e8f0; }
+        .tab-btn.active { 
+            background-color: #0f766e; 
+            color: white; 
+            box-shadow: 0 2px 4px rgba(15, 118, 110, 0.2);
+        }
+
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+    </style>
+</head>
+<body class="p-4 md:p-6 lg:p-8">
+
+    <div class="max-w-7xl mx-auto space-y-6">
+        
+        <!-- Encabezado -->
+        <header class="bg-white p-6 rounded-2xl border border-slate-200 border-t-4 border-t-[#0f766e] shadow-sm flex flex-col md:flex-row justify-between items-center gap-6">
+            <div class="flex items-center gap-5 w-full md:w-auto">
+                <div class="w-16 h-16 bg-teal-50 rounded-xl flex items-center justify-center border border-teal-100 shrink-0">
+                    <i class="fa-solid fa-tower-cell text-2xl text-[#0f766e]"></i>
+                </div>
+                <div>
+                    <h1 class="text-2xl font-black text-slate-800 tracking-tight">Red de Monitoreo Ambiental</h1>
+                    <p class="text-slate-500 font-semibold text-sm mt-1"><i class="fa-solid fa-location-dot mr-1"></i> EMA Monte Veloz (Ruta 36)</p>
+                </div>
+            </div>
+            
+            <div class="flex flex-col items-end gap-2">
+                <span id="systemStatus" class="bg-slate-100 text-slate-600 text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider border border-slate-200">
+                    <i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Sincronizando...
+                </span>
+                <span class="text-[10px] text-slate-400 font-medium">ID ThingSpeak: 3149195</span>
+            </div>
+        </header>
+
+        <!-- Filtros de Tiempo -->
+        <div class="flex flex-col xl:flex-row justify-between items-center gap-4 bg-white p-4 rounded-2xl border border-slate-200 shadow-sm">
+            <div class="flex gap-2 w-full xl:w-auto bg-slate-50 p-1.5 rounded-lg border border-slate-100">
+                <button onclick="setPreset('day')" id="btn-day" class="tab-btn active px-6 py-2 text-sm font-bold rounded-md flex-1">Hoy</button>
+                <button onclick="setPreset('week')" id="btn-week" class="tab-btn px-6 py-2 text-sm font-bold rounded-md flex-1">Semana</button>
+                <button onclick="setPreset('month')" id="btn-month" class="tab-btn px-6 py-2 text-sm font-bold rounded-md flex-1">Mes</button>
+            </div>
+
+            <div class="flex flex-col sm:flex-row items-center gap-3 w-full xl:w-auto">
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 w-full sm:w-auto">
+                    <label class="font-bold text-[10px] text-slate-500 uppercase tracking-wide">Desde</label>
+                    <input type="datetime-local" id="startDatetime" class="bg-transparent border-none text-sm text-slate-700 outline-none w-full">
+                </div>
+                <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-md px-3 py-1.5 w-full sm:w-auto">
+                    <label class="font-bold text-[10px] text-slate-500 uppercase tracking-wide">Hasta</label>
+                    <input type="datetime-local" id="endDatetime" class="bg-transparent border-none text-sm text-slate-700 outline-none w-full">
+                </div>
+                <button onclick="updateDashboard(true)" class="bg-[#0f766e] hover:bg-[#115e59] text-white px-5 py-2.5 rounded-md transition-colors font-bold shadow-sm w-full sm:w-auto flex items-center justify-center text-sm">
+                    <i class="fa-solid fa-filter mr-2"></i>Aplicar
+                </button>
+            </div>
+        </div>
+
+        <!-- TARJETAS DE MÉTRICAS (7 Variables) -->
+        <div class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-7 gap-4">
+            
+            <!-- Temperatura -->
+            <div class="metric-card border-t-[#ea580c]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">Temp.</span>
+                    <i class="fa-solid fa-temperature-half text-[#ea580c] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value" id="valTemp">--</span>
+                    <span class="metric-unit">°C</span>
+                </div>
+            </div>
+
+            <!-- Punto de Rocío -->
+            <div class="metric-card border-t-[#0d9488]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">P. Rocío</span>
+                    <i class="fa-solid fa-droplet-slash text-[#0d9488] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value" id="valDew">--</span>
+                    <span class="metric-unit">°C</span>
+                </div>
+            </div>
+
+            <!-- Humedad -->
+            <div class="metric-card border-t-[#0284c7]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">Humedad</span>
+                    <i class="fa-solid fa-droplet text-[#0284c7] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value" id="valHum">--</span>
+                    <span class="metric-unit">%</span>
+                </div>
+            </div>
+
+            <!-- Presión -->
+            <div class="metric-card border-t-[#9333ea]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">Presión</span>
+                    <i class="fa-solid fa-gauge-high text-[#9333ea] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value" id="valPres">--</span>
+                    <span class="metric-unit">hPa</span>
+                </div>
+            </div>
+
+            <!-- Velocidad Viento -->
+            <div class="metric-card border-t-[#64748b]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">Viento</span>
+                    <i class="fa-solid fa-wind text-[#64748b] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value" id="valWind">--</span>
+                    <span class="metric-unit">km/h</span>
+                </div>
+            </div>
+
+            <!-- Dirección Viento -->
+            <div class="metric-card border-t-[#4f46e5]">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title">Dir. Viento</span>
+                    <i class="fa-regular fa-compass text-[#4f46e5] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="metric-value" id="valWindDir">--</span>
+                    <span class="metric-unit">°</span>
+                    <!-- Indicador Rotativo -->
+                    <div id="dirArrowContainer" class="hidden ml-auto w-8 h-8 rounded-full border border-indigo-100 bg-indigo-50 flex items-center justify-center">
+                        <i id="dirArrow" class="fa-solid fa-arrow-up text-indigo-600 transition-transform duration-700"></i>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Lluvia Acumulada -->
+            <div class="metric-card border-t-[#0f766e] bg-slate-50 col-span-2 md:col-span-1">
+                <div class="flex justify-between items-start mb-4">
+                    <span class="metric-title text-[#0f766e]">Lluvia Acum.</span>
+                    <i class="fa-solid fa-cloud-showers-heavy text-[#0f766e] opacity-80 text-lg"></i>
+                </div>
+                <div class="flex items-baseline">
+                    <span class="metric-value text-[#0f766e]" id="valPrecip">0.0</span>
+                    <span class="metric-unit text-[#0f766e]">mm</span>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- SECCIÓN DE GRÁFICOS -->
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+            
+            <!-- Gráfico: Temp y Punto de Rocío -->
+            <div class="chart-card">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
+                    <i class="fa-solid fa-temperature-full mr-2 text-[#ea580c]"></i> Temperatura y Punto de Rocío
+                </h3>
+                <div class="relative w-full h-[250px]">
+                    <canvas id="chartTempDew"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico: Precipitación Acumulada -->
+            <div class="chart-card">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
+                    <i class="fa-solid fa-chart-column mr-2 text-[#0f766e]"></i> Curva de Lluvia
+                </h3>
+                <div class="relative w-full h-[250px]">
+                    <canvas id="chartPrecip"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico: Presión Atmosférica -->
+            <div class="chart-card">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
+                    <i class="fa-solid fa-gauge mr-2 text-[#9333ea]"></i> Presión Atmosférica
+                </h3>
+                <div class="relative w-full h-[220px]">
+                    <canvas id="chartPres"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico: Humedad -->
+            <div class="chart-card">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
+                    <i class="fa-solid fa-droplet mr-2 text-[#0284c7]"></i> Humedad Relativa
+                </h3>
+                <div class="relative w-full h-[220px]">
+                    <canvas id="chartHum"></canvas>
+                </div>
+            </div>
+
+            <!-- Gráfico: Viento (Velocidad) -->
+            <div class="chart-card col-span-1 xl:col-span-2 mb-8">
+                <h3 class="text-sm font-bold text-slate-700 uppercase tracking-wide mb-4 flex items-center">
+                    <i class="fa-solid fa-wind mr-2 text-[#64748b]"></i> Velocidad del Viento
+                </h3>
+                <div class="relative w-full h-[220px]">
+                    <canvas id="chartWind"></canvas>
+                </div>
+            </div>
+            
+        </div>
+        
+    </div>
+
+    <script>
+        // Configuración específica de Monte Veloz (3149195)
+        const M_VELOZ = { id: "3149195" }; 
+        const MULT_PRECIP = 1; // Asumimos multiplicador directo o suma bruta (modificar si los pulsos valen distinto)
+
+        let charts = {};
+
+        function toDatetimeLocal(date) {
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        function setPreset(range) {
+            const now = new Date();
+            const endStr = toDatetimeLocal(now);
+            const start = new Date(now);
+
+            if (range === 'day') { start.setHours(0, 0, 0, 0); } 
+            else if (range === 'week') { start.setDate(start.getDate() - 7); start.setHours(0, 0, 0, 0); } 
+            else if (range === 'month') { start.setDate(start.getDate() - 30); start.setHours(0, 0, 0, 0); }
+
+            document.getElementById('startDatetime').value = toDatetimeLocal(start);
+            document.getElementById('endDatetime').value = endStr;
+
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            const btn = document.getElementById('btn-' + range);
+            if(btn) btn.classList.add('active');
+
+            updateDashboard();
+        }
+
+        async function fetchFeeds(station, startStr, endStr) {
+            const tsStart = startStr.replace('T', '%20') + ':00';
+            const tsEnd = endStr.replace('T', '%20') + ':59';
+            // Sin API Key, asumiendo canal público
+            const url = `https://api.thingspeak.com/channels/${station.id}/feeds.json?start=${tsStart}&end=${tsEnd}&timezone=America/Argentina/Buenos_Aires&results=8000`;
+            try {
+                const res = await fetch(url);
+                const data = await res.json();
+                return data.feeds || [];
+            } catch (e) {
+                console.error("Error al consultar ThingSpeak", e);
+                return [];
+            }
+        }
+
+        function updateUIStatus(status) {
+            const badge = document.getElementById('systemStatus');
+            if (status === 'loading') {
+                badge.innerHTML = '<i class="fa-solid fa-arrows-rotate mr-1 animate-spin"></i> Sincronizando...';
+                badge.className = "bg-blue-50 text-blue-600 text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider border border-blue-200";
+            } else if (status === 'online') {
+                badge.innerHTML = '<i class="fa-solid fa-circle-check mr-1"></i> Datos Actualizados';
+                badge.className = "bg-emerald-50 text-emerald-600 text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider border border-emerald-200";
+            } else {
+                badge.innerHTML = '<i class="fa-solid fa-triangle-exclamation mr-1"></i> Sin Datos';
+                badge.className = "bg-red-50 text-red-600 text-[10px] font-bold px-3 py-1.5 rounded-md uppercase tracking-wider border border-red-200";
+            }
+        }
+
+        async function updateDashboard(isManual = false) {
+            if (isManual) document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+
+            const startStr = document.getElementById('startDatetime').value;
+            const endStr = document.getElementById('endDatetime').value;
+            
+            if (!startStr || !endStr) return;
+
+            updateUIStatus('loading');
+
+            const feeds = await fetchFeeds(M_VELOZ, startStr, endStr);
+
+            if (feeds.length > 0) updateUIStatus('online');
+            else updateUIStatus('nodata');
+
+            processData(feeds, startStr, endStr);
+        }
+
+        function processData(feeds, startStr, endStr) {
+            const labels = [];
+            const dataTemp = [], dataHum = [], dataPres = [];
+            const dataWind = [], dataRain = [], dataDew = [];
+            
+            let lastTemp = "--", lastHum = "--", lastPres = "--";
+            let lastWind = "--", lastWindDir = "--", lastDew = "--";
+
+            // Lógica de empaquetado para Lluvia Acumulada
+            const start = new Date(startStr); const end = new Date(endStr);
+            const diffHours = (end - start) / 3600000;
+            const bucketByHour = diffHours <= 72; 
+            const precipBuckets = new Map();
+            let current = new Date(start);
+
+            if (bucketByHour) {
+                current.setMinutes(0, 0, 0);
+                while (current <= end) {
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    precipBuckets.set(`${pad(current.getDate())}/${pad(current.getMonth()+1)} ${pad(current.getHours())}:00`, 0);
+                    current.setHours(current.getHours() + 1);
+                }
+            } else {
+                current.setHours(0, 0, 0, 0);
+                while (current <= end) {
+                    const pad = (n) => n.toString().padStart(2, '0');
+                    precipBuckets.set(`${pad(current.getDate())}/${pad(current.getMonth()+1)}/${current.getFullYear()}`, 0);
+                    current.setDate(current.getDate() + 1);
+                }
+            }
+
+            let accumRain = 0;
+
+            feeds.forEach(f => {
+                const dateObj = new Date(f.created_at);
+                const pad = (n) => n.toString().padStart(2, '0');
+                const timeLabel = diffHours <= 72 
+                    ? `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)} ${pad(dateObj.getHours())}:${pad(dateObj.getMinutes())}` 
+                    : `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)}`;
+
+                labels.push(timeLabel);
+
+                /* MAPEADO ESPECÍFICO DE MONTE VELOZ (3149195) */
+                const temp = parseFloat(f.field1);
+                const hum = parseFloat(f.field2);
+                const pres = parseFloat(f.field3);
+                const wind = parseFloat(f.field4);
+                const windDir = parseFloat(f.field5);
+                const rain = parseFloat(f.field6);
+                const dew = parseFloat(f.field7);
+
+                if(!isNaN(temp)) { dataTemp.push(temp); lastTemp = temp.toFixed(1); } else { dataTemp.push(null); }
+                if(!isNaN(hum)) { dataHum.push(hum); lastHum = hum.toFixed(0); } else { dataHum.push(null); }
+                if(!isNaN(pres)) { dataPres.push(pres); lastPres = pres.toFixed(1); } else { dataPres.push(null); }
+                if(!isNaN(wind)) { dataWind.push(wind); lastWind = wind.toFixed(1); } else { dataWind.push(null); }
+                if(!isNaN(dew)) { dataDew.push(dew); lastDew = dew.toFixed(1); } else { dataDew.push(null); }
+                
+                if(!isNaN(windDir)) { lastWindDir = windDir.toFixed(0); }
+
+                // Procesamiento Acumulado de Lluvia
+                if(!isNaN(rain) && rain > 0) {
+                    accumRain += (rain * MULT_PRECIP);
+                    let bKey = bucketByHour 
+                        ? `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)} ${pad(dateObj.getHours())}:00`
+                        : `${pad(dateObj.getDate())}/${pad(dateObj.getMonth()+1)}/${dateObj.getFullYear()}`;
+                    if (precipBuckets.has(bKey)) {
+                        precipBuckets.set(bKey, precipBuckets.get(bKey) + (rain * MULT_PRECIP));
+                    }
+                }
+            });
+
+            const precipLabels = Array.from(precipBuckets.keys());
+            const precipData = [];
+            let runningSum = 0;
+            for (let [k, val] of precipBuckets) {
+                runningSum += val;
+                precipData.push(runningSum);
+            }
+
+            // Actualizar Tarjetas UI
+            document.getElementById('valTemp').innerText = lastTemp;
+            document.getElementById('valHum').innerText = lastHum;
+            document.getElementById('valPres').innerText = lastPres;
+            document.getElementById('valWind').innerText = lastWind;
+            document.getElementById('valWindDir').innerText = lastWindDir;
+            document.getElementById('valDew').innerText = lastDew;
+            document.getElementById('valPrecip').innerText = accumRain.toFixed(1);
+
+            // Rotar Flecha del Viento
+            const dirArrowContainer = document.getElementById('dirArrowContainer');
+            const dirArrow = document.getElementById('dirArrow');
+            if (lastWindDir !== "--") {
+                dirArrowContainer.classList.remove('hidden');
+                dirArrow.style.transform = `rotate(${lastWindDir}deg)`;
+            } else {
+                dirArrowContainer.classList.add('hidden');
+            }
+
+            // Render Gráficos
+            renderTempDewChart(labels, dataTemp, dataDew);
+            renderPrecipChart(precipLabels, precipData);
+            renderPresChart(labels, dataPres);
+            renderHumChart(labels, dataHum);
+            renderWindChart(labels, dataWind);
+        }
+
+        const commonOptions = {
+            responsive: true, maintainAspectRatio: false,
+            interaction: { mode: 'index', intersect: false },
+            plugins: {
+                legend: { labels: { font: { family: 'Inter', size: 12 }, usePointStyle: true, boxWidth: 8 } },
+                tooltip: { backgroundColor: '#1e293b', padding: 10, cornerRadius: 8, titleFont: { family: 'Inter' }, bodyFont: { family: 'Inter', weight: 'bold' } }
+            },
+            elements: { point: { radius: 0, hitRadius: 10, hoverRadius: 5 } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxTicksLimit: 8, color: '#94a3b8', font: {family: 'Inter', size: 11} } },
+                y: { grid: { color: '#f1f5f9' }, ticks: { color: '#64748b', font: {family: 'Inter', size: 11} } }
+            }
+        };
+
+        function renderTempDewChart(labels, temp, dew) {
+            const ctx = document.getElementById('chartTempDew').getContext('2d');
+            if (charts.tempdew) charts.tempdew.destroy();
+            charts.tempdew = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Temperatura (°C)', data: temp, borderColor: '#ea580c', backgroundColor: 'rgba(234, 88, 12, 0.1)', borderWidth: 2, fill: true, tension: 0.3 },
+                        { label: 'Punto de Rocío (°C)', data: dew, borderColor: '#0d9488', borderDash: [5, 5], borderWidth: 2, tension: 0.3 }
+                    ]
+                },
+                options: commonOptions
+            });
+        }
+
+        function renderPrecipChart(labels, data) {
+            const ctx = document.getElementById('chartPrecip').getContext('2d');
+            if (charts.precip) charts.precip.destroy();
+            charts.precip = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Lluvia (mm)', data: data, borderColor: '#0f766e', backgroundColor: 'rgba(15, 118, 110, 0.1)', borderWidth: 2, fill: true, stepped: true }]
+                },
+                options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: true } } }
+            });
+        }
+
+        function renderPresChart(labels, pres) {
+            const ctx = document.getElementById('chartPres').getContext('2d');
+            if (charts.pres) charts.pres.destroy();
+            charts.pres = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Presión (hPa)', data: pres, borderColor: '#9333ea', backgroundColor: 'rgba(147, 51, 234, 0.05)', borderWidth: 2, fill: true }]
+                },
+                options: commonOptions
+            });
+        }
+
+        function renderHumChart(labels, hum) {
+            const ctx = document.getElementById('chartHum').getContext('2d');
+            if (charts.hum) charts.hum.destroy();
+            charts.hum = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Humedad (%)', data: hum, borderColor: '#0284c7', backgroundColor: 'rgba(2, 132, 199, 0.05)', borderWidth: 2, fill: true, tension: 0.3 }]
+                },
+                options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, min: 0, max: 100 } } }
+            });
+        }
+
+        function renderWindChart(labels, wind) {
+            const ctx = document.getElementById('chartWind').getContext('2d');
+            if (charts.wind) charts.wind.destroy();
+            charts.wind = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{ label: 'Vel. Viento (km/h)', data: wind, borderColor: '#64748b', backgroundColor: 'rgba(100, 116, 139, 0.1)', borderWidth: 2, fill: true, tension: 0.2 }]
+                },
+                options: { ...commonOptions, scales: { ...commonOptions.scales, y: { ...commonOptions.scales.y, beginAtZero: true } } }
+            });
+        }
+
+        window.addEventListener('load', () => {
+            setPreset('day');
+        });
+    </script>
+</body>
+</html>
