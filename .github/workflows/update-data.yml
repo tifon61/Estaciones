@@ -1,0 +1,39 @@
+name: Actualizar datos de la estación
+
+on:
+  schedule:
+    - cron: '*/15 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependencias
+        run: pip install -r requirements.txt
+
+      - name: Descargar y procesar datos
+        env:
+          NEXTCLOUD_USER: ${{ secrets.NEXTCLOUD_USER }}
+          NEXTCLOUD_PASS: ${{ secrets.NEXTCLOUD_PASS }}
+          WEBDAV_URL: ${{ secrets.WEBDAV_URL }}
+        run: python fetch_data.py
+
+      - name: Commitear data.json si cambió
+        run: |
+          git config user.name "estacion-bot"
+          git config user.email "estacion-bot@users.noreply.github.com"
+          git add docs/data.json
+          git diff --staged --quiet || git commit -m "Actualizar datos de la estación"
+          git push
