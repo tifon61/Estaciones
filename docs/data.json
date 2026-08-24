@@ -1,13 +1,13 @@
 {
-  "updated_at": "2026-08-24T21:45:43.328835+00:00",
+  "updated_at": "2026-08-24T22:02:59.004704+00:00",
   "current": {
     "date": "24/08/26",
-    "time": "18:35",
-    "temp_out": 8.1,
-    "out_hum": 72.0,
+    "time": "18:55",
+    "temp_out": 7.5,
+    "out_hum": 74.0,
     "wind_speed": 0.0,
     "wind_dir": "---",
-    "bar": 1023.4,
+    "bar": 1023.3,
     "rain": 0.0,
     "in_temp": 12.8
   },
@@ -24638,6 +24638,50 @@
       "wind_speed": 0.0,
       "wind_dir": "---",
       "bar": 1023.4,
+      "rain": 0.0,
+      "in_temp": 12.8
+    },
+    {
+      "date": "24/08/26",
+      "time": "18:40",
+      "temp_out": 7.9,
+      "out_hum": 72.0,
+      "wind_speed": 0.0,
+      "wind_dir": "---",
+      "bar": 1023.3,
+      "rain": 0.0,
+      "in_temp": 12.8
+    },
+    {
+      "date": "24/08/26",
+      "time": "18:45",
+      "temp_out": 7.8,
+      "out_hum": 73.0,
+      "wind_speed": 0.0,
+      "wind_dir": "---",
+      "bar": 1023.5,
+      "rain": 0.0,
+      "in_temp": 12.8
+    },
+    {
+      "date": "24/08/26",
+      "time": "18:50",
+      "temp_out": 7.7,
+      "out_hum": 73.0,
+      "wind_speed": 0.0,
+      "wind_dir": "---",
+      "bar": 1023.4,
+      "rain": 0.0,
+      "in_temp": 12.8
+    },
+    {
+      "date": "24/08/26",
+      "time": "18:55",
+      "temp_out": 7.5,
+      "out_hum": 74.0,
+      "wind_speed": 0.0,
+      "wind_dir": "---",
+      "bar": 1023.3,
       "rain": 0.0,
       "in_temp": 12.8
     }
